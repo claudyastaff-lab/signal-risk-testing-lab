@@ -36,9 +36,16 @@
       font: inherit;
     }
 
+    button:active {
+      transform: scale(0.98);
+    }
+
     header {
       background: #fff;
       border-bottom: 1px solid var(--line);
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
     .wrap {
@@ -89,6 +96,7 @@
       justify-content: center;
       gap: 8px;
       cursor: pointer;
+      transition: all 160ms ease;
     }
 
     .btn:hover {
@@ -100,6 +108,10 @@
       background: var(--ink);
       color: #fff;
       border-color: var(--ink);
+    }
+
+    .btn.primary:hover {
+      background: #2a3a4f;
     }
 
     .icon {
@@ -141,6 +153,7 @@
       margin: 0;
       font-size: 15px;
       line-height: 1.2;
+      font-weight: 600;
     }
 
     .panel-body {
@@ -187,6 +200,7 @@
     input[type="range"] {
       width: 100%;
       accent-color: var(--blue);
+      cursor: pointer;
     }
 
     .select-grid {
@@ -204,6 +218,14 @@
       padding: 0 10px;
       color: var(--ink);
       background: #fff;
+      transition: border 160ms ease;
+    }
+
+    select:focus,
+    input[type="text"]:focus {
+      outline: none;
+      border-color: var(--blue);
+      box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
     }
 
     .switches {
@@ -215,6 +237,7 @@
       display: grid;
       grid-template-columns: repeat(3, 1fr);
       gap: 8px;
+      margin-top: 10px;
     }
 
     .preset-btn {
@@ -226,6 +249,7 @@
       font-size: 12px;
       font-weight: 800;
       color: var(--ink);
+      transition: all 160ms ease;
     }
 
     .preset-btn:hover,
@@ -327,6 +351,7 @@
       transform-origin: center bottom;
       transform: translate(-50%, -100%) rotate(var(--angle));
       z-index: 2;
+      transition: transform 400ms cubic-bezier(0.34, 1.56, 0.64, 1);
     }
 
     .hub {
@@ -430,6 +455,7 @@
       display: block;
       font-size: 13px;
       margin-bottom: 8px;
+      font-weight: 600;
     }
 
     .flow-step span {
@@ -457,6 +483,7 @@
       color: var(--muted);
       font-size: 12px;
       margin-bottom: 8px;
+      font-weight: 600;
     }
 
     .metric .v {
@@ -470,44 +497,6 @@
       grid-template-columns: 1fr 1fr;
       gap: 16px;
       margin-top: 16px;
-    }
-
-    .pattern-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 10px;
-      margin-top: 14px;
-    }
-
-    .pattern-card {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      padding: 10px;
-      background: #fbfcfe;
-      min-height: 118px;
-    }
-
-    .pattern-card strong {
-      display: block;
-      font-size: 13px;
-      margin-bottom: 7px;
-    }
-
-    .pattern-card code {
-      display: block;
-      color: var(--ink);
-      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
-      font-size: 12px;
-      line-height: 1.5;
-      overflow-wrap: anywhere;
-    }
-
-    .pattern-card span {
-      display: block;
-      color: var(--muted);
-      font-size: 11px;
-      line-height: 1.35;
-      margin-top: 8px;
     }
 
     .signal-list {
@@ -558,6 +547,7 @@
       width: var(--w);
       background: var(--bar);
       border-radius: 999px;
+      transition: width 300ms ease;
     }
 
     .json-box {
@@ -572,6 +562,7 @@
       font-size: 12px;
       line-height: 1.55;
       white-space: pre;
+      word-wrap: break-word;
     }
 
     .copied {
@@ -587,11 +578,20 @@
       transform: translateY(10px);
       pointer-events: none;
       transition: 160ms ease;
+      z-index: 100;
     }
 
     .copied.show {
       opacity: 1;
       transform: translateY(0);
+    }
+
+    .score-announcer {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
     }
 
     @media (max-width: 1080px) {
@@ -627,10 +627,6 @@
         grid-template-columns: 1fr 1fr;
       }
 
-      .pattern-grid {
-        grid-template-columns: 1fr;
-      }
-
       .signal-row {
         grid-template-columns: 1fr 54px;
       }
@@ -638,6 +634,26 @@
       .risk-bar {
         grid-column: 1 / -1;
       }
+
+      .preset-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f172a;
+        --panel: #1e293b;
+        --ink: #f1f5f9;
+        --muted: #94a3b8;
+        --line: #334155;
+      }
+
+      header { background: #1e293b; }
+      .btn { background: #334155; color: var(--ink); border-color: #475569; }
+      .btn:hover { background: #475569; }
+      select, input[type="text"] { background: #334155; color: var(--ink); }
+      .json-box { background: #0f172a; }
     }
   </style>
 </head>
@@ -653,7 +669,7 @@
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>
         </button>
         <button class="btn" id="copyBtn" title="Copy JSON" aria-label="Copy JSON">
-          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2"/></svg>
         </button>
         <button class="btn primary" id="downloadBtn" title="Download JSON" aria-label="Download JSON">
           <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
@@ -706,7 +722,7 @@
               <span>Device count</span>
               <span class="value-chip" id="deviceChip">2</span>
             </div>
-            <input id="deviceCount" type="range" min="1" max="5" value="2">
+            <input id="deviceCount" type="range" min="1" max="5" value="2" aria-label="Device count">
           </div>
 
           <div class="control">
@@ -714,7 +730,7 @@
               <span>Profile age</span>
               <span class="value-chip" id="profileChip">210 days</span>
             </div>
-            <input id="profileAge" type="range" min="1" max="1500" value="210">
+            <input id="profileAge" type="range" min="1" max="1500" value="210" aria-label="Profile age in days">
           </div>
 
           <div class="control">
@@ -722,7 +738,7 @@
               <span>Page age at lock</span>
               <span class="value-chip" id="pageChip">14 days</span>
             </div>
-            <input id="pageAge" type="range" min="1" max="365" value="14">
+            <input id="pageAge" type="range" min="1" max="365" value="14" aria-label="Page age in days">
           </div>
 
           <div class="control">
@@ -730,7 +746,7 @@
               <span>Viral after management</span>
               <span class="value-chip" id="viralChip">5 days</span>
             </div>
-            <input id="viralDays" type="range" min="1" max="60" value="5">
+            <input id="viralDays" type="range" min="1" max="60" value="5" aria-label="Viral days">
           </div>
 
           <div class="control">
@@ -748,10 +764,21 @@
               <span class="value-chip" id="modifierChip">3 active</span>
             </div>
             <div class="switches">
-              <label class="switch"><span>Recovery activity</span><input id="recoveryActivity" type="checkbox" checked></label>
-              <label class="switch"><span>Possible proxy/VPN</span><input id="proxyVpn" type="checkbox" checked></label>
-              <label class="switch"><span>Admin asset risk</span><input id="adminRisk" type="checkbox" checked></label>
-              <label class="switch"><span>Trusted cookie present</span><input id="trustedCookie" type="checkbox"></label>
+              <label class="switch"><span>Recovery activity</span><input id="recoveryActivity" type="checkbox" checked aria-label="Recovery activity"></label>
+              <label class="switch"><span>Possible proxy/VPN</span><input id="proxyVpn" type="checkbox" checked aria-label="Possible proxy or VPN"></label>
+              <label class="switch"><span>Admin asset risk</span><input id="adminRisk" type="checkbox" checked aria-label="Admin asset risk"></label>
+              <label class="switch"><span>Trusted cookie present</span><input id="trustedCookie" type="checkbox" aria-label="Trusted cookie present"></label>
+            </div>
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Quick Presets</span>
+            </div>
+            <div class="preset-grid">
+              <button class="preset-btn" id="presetLow">Low Risk</button>
+              <button class="preset-btn" id="presetMed">Medium Risk</button>
+              <button class="preset-btn" id="presetHigh">High Risk</button>
             </div>
           </div>
         </div>
@@ -828,8 +855,15 @@
   </main>
 
   <div class="copied" id="copiedToast">Copied JSON</div>
+  <div class="score-announcer" aria-live="polite" aria-atomic="true" id="scoreAnnouncer"></div>
 
   <script>
+    /**
+     * Signal Risk Lab - Interactive risk scoring tool
+     * Manages state, calculations, and UI updates
+     */
+
+    // Configuration & Defaults
     const defaults = {
       desktopCountry: "GB",
       mobileCountry: "US",
@@ -846,9 +880,162 @@
       trustedCookie: false
     };
 
-    const ids = Object.keys(defaults);
-    const $ = (id) => document.getElementById(id);
+    const presets = {
+      low: {
+        desktopCountry: "GB",
+        mobileCountry: "GB",
+        identityCountry: "GB",
+        deviceCount: 1,
+        profileAge: 1000,
+        pageAge: 200,
+        viralDays: 30,
+        phoneNumber: "+44 7700 900000",
+        passportNumber: "GB123456",
+        recoveryActivity: false,
+        proxyVpn: false,
+        adminRisk: false,
+        trustedCookie: true
+      },
+      medium: {
+        desktopCountry: "GB",
+        mobileCountry: "US",
+        identityCountry: "GB",
+        deviceCount: 2,
+        profileAge: 200,
+        pageAge: 30,
+        viralDays: 14,
+        phoneNumber: "+44 7700 900000",
+        passportNumber: "GB123456",
+        recoveryActivity: true,
+        proxyVpn: false,
+        adminRisk: false,
+        trustedCookie: false
+      },
+      high: {
+        desktopCountry: "US",
+        mobileCountry: "SG",
+        identityCountry: "ID",
+        deviceCount: 5,
+        profileAge: 30,
+        pageAge: 5,
+        viralDays: 2,
+        phoneNumber: "+62 851-7429-6831",
+        passportNumber: "ID12345",
+        recoveryActivity: true,
+        proxyVpn: true,
+        adminRisk: true,
+        trustedCookie: false
+      }
+    };
 
+    // Cache DOM elements
+    const els = {
+      // Controls
+      desktopCountry: document.getElementById("desktopCountry"),
+      mobileCountry: document.getElementById("mobileCountry"),
+      identityCountry: document.getElementById("identityCountry"),
+      deviceCount: document.getElementById("deviceCount"),
+      profileAge: document.getElementById("profileAge"),
+      pageAge: document.getElementById("pageAge"),
+      viralDays: document.getElementById("viralDays"),
+      phoneNumber: document.getElementById("phoneNumber"),
+      passportNumber: document.getElementById("passportNumber"),
+      recoveryActivity: document.getElementById("recoveryActivity"),
+      proxyVpn: document.getElementById("proxyVpn"),
+      adminRisk: document.getElementById("adminRisk"),
+      trustedCookie: document.getElementById("trustedCookie"),
+
+      // Chips & Labels
+      countryChip: document.getElementById("countryChip"),
+      deviceChip: document.getElementById("deviceChip"),
+      profileChip: document.getElementById("profileChip"),
+      pageChip: document.getElementById("pageChip"),
+      viralChip: document.getElementById("viralChip"),
+      modifierChip: document.getElementById("modifierChip"),
+      scenarioLabel: document.getElementById("scenarioLabel"),
+
+      // Display
+      gauge: document.getElementById("gauge"),
+      scoreNumber: document.getElementById("scoreNumber"),
+      decisionPill: document.getElementById("decisionPill"),
+      decisionTitle: document.getElementById("decisionTitle"),
+      decisionText: document.getElementById("decisionText"),
+      triggerPills: document.getElementById("triggerPills"),
+      signalList: document.getElementById("signalList"),
+      jsonBox: document.getElementById("jsonBox"),
+
+      // Metrics
+      metricDesktop: document.getElementById("metricDesktop"),
+      metricMobile: document.getElementById("metricMobile"),
+      metricIdentity: document.getElementById("metricIdentity"),
+      metricViral: document.getElementById("metricViral"),
+
+      // Flow
+      flowAccess: document.getElementById("flowAccess"),
+      flowIdentity: document.getElementById("flowIdentity"),
+      flowAsset: document.getElementById("flowAsset"),
+      flowScore: document.getElementById("flowScore"),
+      flowDecision: document.getElementById("flowDecision"),
+
+      // Summary
+      positiveTotal: document.getElementById("positiveTotal"),
+      reductionTotal: document.getElementById("reductionTotal"),
+
+      // Buttons
+      resetBtn: document.getElementById("resetBtn"),
+      copyBtn: document.getElementById("copyBtn"),
+      downloadBtn: document.getElementById("downloadBtn"),
+      presetLow: document.getElementById("presetLow"),
+      presetMed: document.getElementById("presetMed"),
+      presetHigh: document.getElementById("presetHigh"),
+
+      // Toast
+      copiedToast: document.getElementById("copiedToast"),
+      scoreAnnouncer: document.getElementById("scoreAnnouncer")
+    };
+
+    // Debounce function for performance
+    function debounce(fn, ms = 150) {
+      let timeout;
+      return function(...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => fn.apply(this, args), ms);
+      };
+    }
+
+    // Get all input states
+    function getState() {
+      return {
+        desktopCountry: els.desktopCountry.value,
+        mobileCountry: els.mobileCountry.value,
+        identityCountry: els.identityCountry.value,
+        deviceCount: Number(els.deviceCount.value),
+        profileAge: Number(els.profileAge.value),
+        pageAge: Number(els.pageAge.value),
+        viralDays: Number(els.viralDays.value),
+        phoneNumber: els.phoneNumber.value,
+        passportNumber: els.passportNumber.value,
+        recoveryActivity: els.recoveryActivity.checked,
+        proxyVpn: els.proxyVpn.checked,
+        adminRisk: els.adminRisk.checked,
+        trustedCookie: els.trustedCookie.checked
+      };
+    }
+
+    // Set all input states
+    function setState(state) {
+      Object.entries(state).forEach(([key, value]) => {
+        const el = els[key];
+        if (!el) return;
+        if (el.type === "checkbox") {
+          el.checked = value;
+        } else {
+          el.value = value;
+        }
+      });
+    }
+
+    // Calculate risk color based on value
     function riskColor(value) {
       if (value < 0) return "var(--green)";
       if (value >= 28) return "var(--red)";
@@ -856,24 +1043,7 @@
       return "var(--cyan)";
     }
 
-    function getState() {
-      return {
-        desktopCountry: $("desktopCountry").value,
-        mobileCountry: $("mobileCountry").value,
-        identityCountry: $("identityCountry").value,
-        deviceCount: Number($("deviceCount").value),
-        profileAge: Number($("profileAge").value),
-        pageAge: Number($("pageAge").value),
-        viralDays: Number($("viralDays").value),
-        phoneNumber: $("phoneNumber").value,
-        passportNumber: $("passportNumber").value,
-        recoveryActivity: $("recoveryActivity").checked,
-        proxyVpn: $("proxyVpn").checked,
-        adminRisk: $("adminRisk").checked,
-        trustedCookie: $("trustedCookie").checked
-      };
-    }
-
+    // Score all signals
     function scoreSignals(s) {
       const accessCountries = new Set([s.desktopCountry, s.mobileCountry]);
       const identityMismatch = !accessCountries.has(s.identityCountry);
@@ -883,66 +1053,77 @@
       return [
         {
           name: "geo_mismatch",
+          label: "Geographic Mismatch",
           value: `${s.desktopCountry}_${s.mobileCountry}_${s.identityCountry}`,
           risk: geoMismatch >= 3 ? 28 : geoMismatch === 2 ? 14 : 0,
           weight: "high"
         },
         {
           name: "ip_country_split",
+          label: "IP Country Split",
           value: accessCountries.size,
           risk: accessCountries.size > 1 ? 22 : 0,
           weight: "high"
         },
         {
           name: "identity_access_mismatch",
+          label: "Identity Access Mismatch",
           value: identityMismatch,
           risk: identityMismatch ? 18 : 0,
           weight: "medium"
         },
         {
           name: "multi_device_recovery",
+          label: "Multi-Device Recovery",
           value: s.deviceCount,
           risk: Math.max(0, (s.deviceCount - 1) * 10),
           weight: "medium_high"
         },
         {
           name: "profile_age_young",
+          label: "Young Profile",
           value_days: s.profileAge,
           risk: s.profileAge < 90 ? 22 : s.profileAge < 365 ? 12 : 0,
           weight: "medium"
         },
         {
           name: "page_age_young",
+          label: "Young Page",
           value_days: s.pageAge,
           risk: s.pageAge <= 14 ? 22 : s.pageAge <= 45 ? 12 : 0,
           weight: "medium_high"
         },
         {
           name: "rapid_viral_growth",
+          label: "Rapid Viral Growth",
           value_days: s.viralDays,
           risk: s.viralDays <= 5 ? 35 : s.viralDays <= 14 ? 20 : s.viralDays <= 30 ? 10 : 0,
           weight: "high"
         },
         {
           name: "admin_asset_risk",
+          label: "Admin Asset Risk",
           value: s.adminRisk,
           risk: s.adminRisk ? 30 : 0,
           weight: "high"
         },
         {
           name: "possible_proxy_or_vpn",
+          label: "Proxy/VPN Detected",
           value: s.proxyVpn,
           risk: s.proxyVpn ? 25 : 0,
           weight: "conditional"
         },
         {
           name: "recovery_activity",
+          label: "Recovery Activity",
           value: s.recoveryActivity,
           risk: s.recoveryActivity ? 15 : 0,
           weight: "medium"
         },
         {
           name: "identity_country_match",
+          label: "Identity Match",
           value: {
             phone_number: s.phoneNumber,
             passport_number: s.passportNumber,
@@ -953,6 +1134,7 @@
         },
         {
           name: "trusted_cookie",
+          label: "Trusted Cookie",
           value: s.trustedCookie,
           risk: s.trustedCookie ? -30 : 0,
           weight: "risk_reducer_if_present"
@@ -960,6 +1142,7 @@
       ];
     }
 
+    // Get decision based on score
     function decisionFor(score) {
       if (score <= 39) return {
         key: "allow",
@@ -998,160 +1181,170 @@
       };
     }
 
-    function buildAnalysis() {
-      const s = getState();
-      const signals = scoreSignals(s);
-      const positive = signals.filter((x) => x.risk > 0).reduce((sum, x) => sum + x.risk, 0);
-      const reduction = signals.filter((x) => x.risk < 0).reduce((sum, x) => sum + x.risk, 0);
-      const combined = Math.max(0, positive + reduction);
-      const decision = decisionFor(combined);
-      const primary = signals
-        .filter((x) => x.risk >= 22)
-        .sort((a, b) => b.risk - a.risk)
-        .map((x) => x.name);
-
-      return {
-        case_type: "interactive_signal_risk_analysis",
-        model: "conceptual_not_meta_internal",
-        inputs: {
-          profile_age_days: s.profileAge,
-          page_age_days: s.pageAge,
-          viral_after_management_days: s.viralDays,
-          desktop_ip: "80.245.44.46",
-          desktop_country: s.desktopCountry,
-          mobile_ip: "38.213.28.85",
-          mobile_country: s.mobileCountry,
-          identity_country: s.identityCountry,
-          phone_number: s.phoneNumber,
-          passport_number: s.passportNumber,
-          device_count: s.deviceCount,
-          recovery_activity: s.recoveryActivity,
-          possible_proxy_or_vpn: s.proxyVpn,
-          admin_asset_risk: s.adminRisk,
-          trusted_cookie: s.trustedCookie
-        },
-        signals: Object.fromEntries(signals.map((x) => [x.name, x])),
-        score: {
-          positive_risk_total: positive,
-          risk_reduction_total: reduction,
-          combined_score: combined
-        },
-        thresholds: {
-          allow: [0, 39],
-          step_up_verify: [40, 79],
-          temporary_lock: [80, 119],
-          manual_review: [120, 179],
-          account_page_lock: [180, 999]
-        },
-        decision: {
-          value: decision.key,
-          label: decision.label,
-          primary_triggers: primary
-        },
-        recommended_stabilizers: {
-          trusted_device: true,
-          single_country_ip: true,
-          no_proxy_vpn: true,
-          same_phone_number: true,
-          low_retry_rate: true
-        }
-      };
-    }
-
-    function render() {
+    // Update UI
+    function update() {
       const state = getState();
-      const analysis = buildAnalysis();
-      const signalArray = Object.values(analysis.signals);
-      const score = analysis.score.combined_score;
-      const decision = decisionFor(score);
-      const angle = Math.min(150, Math.max(-150, -150 + (score / 240) * 300));
+      const signals = scoreSignals(state);
+      const totalRisk = signals.reduce((sum, s) => sum + s.risk, 0);
+      const positiveRisk = signals.filter(s => s.risk > 0).reduce((sum, s) => sum + s.risk, 0);
+      const negativeRisk = signals.filter(s => s.risk < 0).reduce((sum, s) => sum + s.risk, 0);
+      const decision = decisionFor(totalRisk);
 
-      $("countryChip").textContent = `${state.desktopCountry} / ${state.mobileCountry} / ${state.identityCountry}`;
-      $("deviceChip").textContent = state.deviceCount;
-      $("profileChip").textContent = `${state.profileAge} days`;
-      $("pageChip").textContent = `${state.pageAge} days`;
-      $("viralChip").textContent = `${state.viralDays} days`;
+      // Update chips
+      const countries = [state.desktopCountry, state.mobileCountry, state.identityCountry];
+      els.countryChip.textContent = [...new Set(countries)].join(" / ");
+      els.deviceChip.textContent = state.deviceCount;
+      els.profileChip.textContent = `${state.profileAge} days`;
+      els.pageChip.textContent = `${state.pageAge} days`;
+      els.viralChip.textContent = `${state.viralDays} days`;
 
-      const activeModifiers = ["recoveryActivity", "proxyVpn", "adminRisk", "trustedCookie"].filter((id) => $(id).checked).length;
-      $("modifierChip").textContent = `${activeModifiers} active`;
+      // Update modifiers
+      const modifiers = [state.recoveryActivity, state.proxyVpn, state.adminRisk, state.trustedCookie].filter(Boolean).length;
+      els.modifierChip.textContent = `${modifiers} active`;
 
-      $("gauge").style.setProperty("--angle", `${angle}deg`);
-      $("scoreNumber").textContent = score;
-      $("decisionTitle").textContent = decision.title;
-      $("decisionText").textContent = decision.text;
-      $("decisionPill").className = `pill ${decision.className}`;
-      $("decisionPill").textContent = decision.label;
+      // Update gauge
+      const maxAngle = 270;
+      const maxScore = 300;
+      const angle = (Math.min(Math.max(totalRisk, 0), maxScore) / maxScore) * maxAngle - 135;
+      els.gauge.style.setProperty("--angle", `${angle}deg`);
+      els.scoreNumber.textContent = totalRisk;
 
-      $("metricDesktop").textContent = state.desktopCountry;
-      $("metricMobile").textContent = state.mobileCountry;
-      $("metricIdentity").textContent = state.identityCountry;
-      $("metricViral").textContent = `${state.viralDays}d`;
-      $("flowAccess").textContent = `${state.desktopCountry} desktop + ${state.mobileCountry} mobile`;
-      $("flowIdentity").textContent = `${state.identityCountry} phone + passport`;
-      $("flowAsset").textContent = `${state.profileAge}d profile + ${state.pageAge}d page`;
-      $("flowScore").textContent = `${score} combined risk`;
-      $("flowDecision").textContent = decision.label;
-      $("positiveTotal").textContent = `positive +${analysis.score.positive_risk_total}`;
-      $("reductionTotal").textContent = `reduction ${analysis.score.risk_reduction_total}`;
+      // Update decision
+      els.decisionTitle.textContent = decision.title;
+      els.decisionText.textContent = decision.text;
+      els.decisionPill.textContent = decision.label;
+      els.decisionPill.className = `pill ${decision.className}`;
 
-      $("triggerPills").innerHTML = analysis.decision.primary_triggers.slice(0, 5).map((name) => (
-        `<span class="pill neutral">${name}</span>`
-      )).join("");
+      // Update metrics
+      els.metricDesktop.textContent = state.desktopCountry;
+      els.metricMobile.textContent = state.mobileCountry;
+      els.metricIdentity.textContent = state.identityCountry;
+      els.metricViral.textContent = `${state.viralDays}d`;
 
-      $("signalList").innerHTML = signalArray
-        .sort((a, b) => Math.abs(b.risk) - Math.abs(a.risk))
-        .map((signal) => {
-          const width = Math.min(100, Math.abs(signal.risk) / 35 * 100);
-          const value = typeof signal.value === "object" ? signal.value.match : signal.value ?? signal.value_days;
-          return `
-            <div class="signal-row">
-              <div>
-                <div class="signal-name">${signal.name}</div>
-                <div class="signal-value">${value}</div>
-              </div>
-              <div class="risk-num">${signal.risk > 0 ? "+" : ""}${signal.risk}</div>
-              <div class="risk-bar"><span class="risk-fill" style="--w:${width}%;--bar:${riskColor(signal.risk)}"></span></div>
+      // Update flow
+      els.flowAccess.textContent = `${state.desktopCountry} desktop + ${state.mobileCountry} mobile`;
+      els.flowIdentity.textContent = `${state.identityCountry} phone + passport`;
+      els.flowAsset.textContent = state.profileAge < 90 && state.pageAge <= 14 ? "young profile + young page" : "mixed age assets";
+      els.flowScore.textContent = `${totalRisk} combined risk`;
+      els.flowDecision.textContent = decision.label.toLowerCase();
+
+      // Update summaries
+      els.positiveTotal.textContent = `positive +${positiveRisk}`;
+      els.reductionTotal.textContent = `reduction ${negativeRisk}`;
+
+      // Update signal list
+      els.signalList.innerHTML = signals.map(s => {
+        const valueStr = typeof s.value === "object" ? s.value.match : (s.value_days ?? s.value);
+        const barWidth = Math.max(0, Math.min(100, (s.risk / 40) * 100));
+        const color = riskColor(s.risk);
+        return `
+          <div class="signal-row">
+            <div>
+              <div class="signal-name">${s.label}</div>
+              <div class="signal-value">${valueStr}</div>
             </div>
-          `;
-        }).join("");
+            <div class="risk-num">${s.risk}</div>
+            <div class="risk-bar"><span class="risk-fill" style="--w: ${barWidth}%; --bar: ${color}"></span></div>
+          </div>
+        `;
+      }).join("");
 
-      $("jsonBox").textContent = JSON.stringify(analysis, null, 2);
+      // Update JSON
+      const output = {
+        scenario: decision.key,
+        risk_score: totalRisk,
+        positive_risk: positiveRisk,
+        negative_risk: negativeRisk,
+        net_risk: totalRisk,
+        decision: decision.label,
+        timestamp: new Date().toISOString(),
+        state,
+        signals: signals.map(s => ({
+          name: s.name,
+          label: s.label,
+          risk: s.risk,
+          weight: s.weight
+        }))
+      };
+      els.jsonBox.textContent = JSON.stringify(output, null, 2);
+
+      // Announce to screen readers
+      els.scoreAnnouncer.textContent = `Risk score: ${totalRisk}. Decision: ${decision.title}.`;
     }
 
-    function reset() {
-      for (const [id, value] of Object.entries(defaults)) {
-        const el = $(id);
-        if (typeof value === "boolean") el.checked = value;
-        else el.value = value;
-      }
-      render();
+    // Debounced update
+    const debouncedUpdate = debounce(update, 100);
+
+    // Event listeners
+    function addListeners() {
+      // All input changes
+      const inputs = [
+        els.desktopCountry, els.mobileCountry, els.identityCountry,
+        els.deviceCount, els.profileAge, els.pageAge, els.viralDays,
+        els.phoneNumber, els.passportNumber,
+        els.recoveryActivity, els.proxyVpn, els.adminRisk, els.trustedCookie
+      ];
+
+      inputs.forEach(el => {
+        el.addEventListener("change", debouncedUpdate);
+        el.addEventListener("input", debouncedUpdate);
+      });
+
+      // Reset button
+      els.resetBtn.addEventListener("click", () => {
+        setState(defaults);
+        update();
+      });
+
+      // Copy button
+      els.copyBtn.addEventListener("click", () => {
+        const text = els.jsonBox.textContent;
+        navigator.clipboard.writeText(text).then(() => {
+          els.copiedToast.classList.add("show");
+          setTimeout(() => els.copiedToast.classList.remove("show"), 2000);
+        }).catch(err => console.error("Copy failed:", err));
+      });
+
+      // Download button
+      els.downloadBtn.addEventListener("click", () => {
+        const text = els.jsonBox.textContent;
+        const blob = new Blob([text], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `risk-lab-${new Date().toISOString().slice(0, 10)}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      });
+
+      // Preset buttons
+      els.presetLow.addEventListener("click", () => {
+        setState(presets.low);
+        update();
+        document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+        els.presetLow.classList.add("active");
+      });
+
+      els.presetMed.addEventListener("click", () => {
+        setState(presets.medium);
+        update();
+        document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+        els.presetMed.classList.add("active");
+      });
+
+      els.presetHigh.addEventListener("click", () => {
+        setState(presets.high);
+        update();
+        document.querySelectorAll(".preset-btn").forEach(btn => btn.classList.remove("active"));
+        els.presetHigh.classList.add("active");
+      });
     }
 
-    async function copyJson() {
-      await navigator.clipboard.writeText($("jsonBox").textContent);
-      $("copiedToast").classList.add("show");
-      setTimeout(() => $("copiedToast").classList.remove("show"), 1400);
-    }
-
-    function downloadJson() {
-      const blob = new Blob([$("jsonBox").textContent], { type: "application/json" });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "interactive-signal-risk-analysis.json";
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    for (const id of ids) {
-      $(id).addEventListener("input", render);
-      $(id).addEventListener("change", render);
-    }
-
-    $("resetBtn").addEventListener("click", reset);
-    $("copyBtn").addEventListener("click", copyJson);
-    $("downloadBtn").addEventListener("click", downloadJson);
-    render();
+    // Initialize
+    addListeners();
+    update();
   </script>
 </body>
 </html>
