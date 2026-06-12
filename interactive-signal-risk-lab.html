@@ -1,0 +1,1157 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Signal Risk Lab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #61718a;
+      --line: #d8e0eb;
+      --blue: #2563eb;
+      --cyan: #008aa6;
+      --green: #16805a;
+      --amber: #c77700;
+      --red: #c62828;
+      --violet: #6d4cc2;
+      --shadow: 0 16px 38px rgba(23, 32, 51, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button,
+    input,
+    select {
+      font: inherit;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wrap {
+      width: min(1380px, calc(100% - 28px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      letter-spacing: 0;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      height: 38px;
+      min-width: 38px;
+      border-radius: 8px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      border-color: #aeb9ca;
+      background: #f8fafc;
+    }
+
+    .btn.primary {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .icon {
+      width: 17px;
+      height: 17px;
+      display: inline-block;
+    }
+
+    main {
+      padding: 20px 0 34px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 54px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      border-bottom: 1px solid #edf1f6;
+      padding-bottom: 13px;
+    }
+
+    .control:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .value-chip {
+      color: var(--muted);
+      background: #f2f5f9;
+      border: 1px solid #e0e7f0;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .select-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    select,
+    input[type="text"] {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .switches {
+      display: grid;
+      gap: 9px;
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .preset-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      min-height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+    }
+
+    .preset-btn:hover,
+    .preset-btn.active {
+      border-color: var(--blue);
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .switch input {
+      width: 44px;
+      height: 24px;
+      appearance: none;
+      background: #cbd5e1;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: 160ms ease;
+      flex: 0 0 auto;
+    }
+
+    .switch input::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px;
+      left: 3px;
+      transition: 160ms ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+    }
+
+    .switch input:checked {
+      background: var(--green);
+    }
+
+    .switch input:checked::after {
+      left: 23px;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: 1.25fr 0.75fr;
+      gap: 16px;
+      align-items: stretch;
+    }
+
+    .score-panel {
+      min-height: 360px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 18px;
+      align-items: center;
+    }
+
+    .gauge {
+      width: 208px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #fff 0 56%, transparent 57%),
+        conic-gradient(var(--green) 0deg 72deg, var(--amber) 72deg 162deg, var(--red) 162deg 360deg);
+      position: relative;
+      border: 1px solid var(--line);
+    }
+
+    .gauge::after {
+      content: "";
+      position: absolute;
+      inset: 25px;
+      border-radius: 50%;
+      border: 1px solid #ebeff5;
+    }
+
+    .needle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4px;
+      height: 82px;
+      background: var(--ink);
+      border-radius: 999px;
+      transform-origin: center bottom;
+      transform: translate(-50%, -100%) rotate(var(--angle));
+      z-index: 2;
+    }
+
+    .hub {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--ink);
+      transform: translate(-50%, -50%);
+      z-index: 3;
+    }
+
+    .score-number {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: 850;
+      z-index: 4;
+    }
+
+    .score-max {
+      position: absolute;
+      left: 50%;
+      top: 76%;
+      transform: translate(-50%, -50%);
+      color: var(--muted);
+      font-size: 12px;
+      z-index: 4;
+    }
+
+    .decision h2 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .decision p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 620px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pill.allow { color: #047857; background: #dff7eb; }
+    .pill.verify { color: #8a5600; background: #fff0c2; }
+    .pill.lock { color: #991b1b; background: #ffe1e1; }
+    .pill.review { color: #5630a6; background: #eee7ff; }
+    .pill.neutral { color: #334155; background: #eef2f7; }
+
+    .signal-flow {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .flow-step {
+      min-height: 122px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 13px;
+      background: #fff;
+      position: relative;
+    }
+
+    .flow-step::after {
+      content: "";
+      position: absolute;
+      top: 50%;
+      right: -12px;
+      width: 12px;
+      height: 2px;
+      background: var(--line);
+    }
+
+    .flow-step:last-child::after { display: none; }
+
+    .flow-step strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 8px;
+    }
+
+    .flow-step span {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      padding: 12px;
+      min-height: 92px;
+    }
+
+    .metric .k {
+      color: var(--muted);
+      font-size: 12px;
+      margin-bottom: 8px;
+    }
+
+    .metric .v {
+      font-size: 22px;
+      font-weight: 850;
+      overflow-wrap: anywhere;
+    }
+
+    .section-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-top: 16px;
+    }
+
+    .pattern-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin-top: 14px;
+    }
+
+    .pattern-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      background: #fbfcfe;
+      min-height: 118px;
+    }
+
+    .pattern-card strong {
+      display: block;
+      font-size: 13px;
+      margin-bottom: 7px;
+    }
+
+    .pattern-card code {
+      display: block;
+      color: var(--ink);
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .pattern-card span {
+      display: block;
+      color: var(--muted);
+      font-size: 11px;
+      line-height: 1.35;
+      margin-top: 8px;
+    }
+
+    .signal-list {
+      display: grid;
+      gap: 9px;
+    }
+
+    .signal-row {
+      display: grid;
+      grid-template-columns: 1fr 64px 84px;
+      gap: 10px;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 10px;
+      min-height: 52px;
+      background: #fff;
+    }
+
+    .signal-name {
+      font-size: 13px;
+      font-weight: 800;
+    }
+
+    .signal-value {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+      overflow-wrap: anywhere;
+    }
+
+    .risk-num {
+      font-size: 18px;
+      font-weight: 850;
+      text-align: right;
+    }
+
+    .risk-bar {
+      height: 8px;
+      border-radius: 999px;
+      background: #e8edf4;
+      overflow: hidden;
+    }
+
+    .risk-fill {
+      display: block;
+      height: 100%;
+      width: var(--w);
+      background: var(--bar);
+      border-radius: 999px;
+    }
+
+    .json-box {
+      min-height: 420px;
+      max-height: 620px;
+      overflow: auto;
+      padding: 14px;
+      background: #101827;
+      color: #dbeafe;
+      border-radius: 8px;
+      font-family: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      font-size: 12px;
+      line-height: 1.55;
+      white-space: pre;
+    }
+
+    .copied {
+      position: fixed;
+      right: 18px;
+      bottom: 18px;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 8px;
+      padding: 10px 12px;
+      font-size: 13px;
+      opacity: 0;
+      transform: translateY(10px);
+      pointer-events: none;
+      transition: 160ms ease;
+    }
+
+    .copied.show {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    @media (max-width: 1080px) {
+      .layout,
+      .hero-grid,
+      .section-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-flow {
+        grid-template-columns: 1fr;
+      }
+
+      .flow-step::after {
+        display: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .wrap {
+        width: min(100% - 20px, 1380px);
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .gauge {
+        width: min(208px, 70vw);
+      }
+
+      .metrics {
+        grid-template-columns: 1fr 1fr;
+      }
+
+      .pattern-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-row {
+        grid-template-columns: 1fr 54px;
+      }
+
+      .risk-bar {
+        grid-column: 1 / -1;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap topbar">
+      <div>
+        <h1>Interactive Signal Risk Lab</h1>
+        <p class="sub">Live conceptual model for account access, identity verification, page growth, and security lock pressure.</p>
+      </div>
+      <div class="toolbar">
+        <button class="btn" id="resetBtn" title="Reset scenario" aria-label="Reset scenario">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7"/><path d="M3 3v6h6"/></svg>
+        </button>
+        <button class="btn" id="copyBtn" title="Copy JSON" aria-label="Copy JSON">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        </button>
+        <button class="btn primary" id="downloadBtn" title="Download JSON" aria-label="Download JSON">
+          <svg class="icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          JSON
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="layout">
+      <aside class="panel">
+        <div class="panel-head">
+          <h2 class="panel-title">Signal Controls</h2>
+          <span class="pill neutral" id="scenarioLabel">default case</span>
+        </div>
+        <div class="panel-body controls">
+          <div class="control">
+            <div class="label-row">
+              <span>Access countries</span>
+              <span class="value-chip" id="countryChip">GB / US / ID</span>
+            </div>
+            <div class="select-grid">
+              <select id="desktopCountry" aria-label="Desktop country">
+                <option value="ID">Desktop ID</option>
+                <option value="GB" selected>Desktop GB</option>
+                <option value="US">Desktop US</option>
+                <option value="SG">Desktop SG</option>
+                <option value="MY">Desktop MY</option>
+              </select>
+              <select id="mobileCountry" aria-label="Mobile country">
+                <option value="ID">Mobile ID</option>
+                <option value="GB">Mobile GB</option>
+                <option value="US" selected>Mobile US</option>
+                <option value="SG">Mobile SG</option>
+                <option value="MY">Mobile MY</option>
+              </select>
+            </div>
+            <select id="identityCountry" aria-label="Identity country">
+              <option value="ID" selected>Identity ID</option>
+              <option value="GB">Identity GB</option>
+              <option value="US">Identity US</option>
+              <option value="SG">Identity SG</option>
+              <option value="MY">Identity MY</option>
+            </select>
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Device count</span>
+              <span class="value-chip" id="deviceChip">2</span>
+            </div>
+            <input id="deviceCount" type="range" min="1" max="5" value="2">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Profile age</span>
+              <span class="value-chip" id="profileChip">210 days</span>
+            </div>
+            <input id="profileAge" type="range" min="1" max="1500" value="210">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Page age at lock</span>
+              <span class="value-chip" id="pageChip">14 days</span>
+            </div>
+            <input id="pageAge" type="range" min="1" max="365" value="14">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Viral after management</span>
+              <span class="value-chip" id="viralChip">5 days</span>
+            </div>
+            <input id="viralDays" type="range" min="1" max="60" value="5">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Fake identity values</span>
+              <span class="value-chip">comparison</span>
+            </div>
+            <input id="phoneNumber" type="text" value="+62 851-7429-6831" aria-label="Phone number">
+            <input id="passportNumber" type="text" value="C7384921" aria-label="Passport number">
+          </div>
+
+          <div class="control">
+            <div class="label-row">
+              <span>Modifiers</span>
+              <span class="value-chip" id="modifierChip">3 active</span>
+            </div>
+            <div class="switches">
+              <label class="switch"><span>Recovery activity</span><input id="recoveryActivity" type="checkbox" checked></label>
+              <label class="switch"><span>Possible proxy/VPN</span><input id="proxyVpn" type="checkbox" checked></label>
+              <label class="switch"><span>Admin asset risk</span><input id="adminRisk" type="checkbox" checked></label>
+              <label class="switch"><span>Trusted cookie present</span><input id="trustedCookie" type="checkbox"></label>
+            </div>
+          </div>
+        </div>
+      </aside>
+
+      <section>
+        <div class="hero-grid">
+          <section class="panel score-panel">
+            <div class="panel-head">
+              <h2 class="panel-title">Live Decision</h2>
+              <span class="pill lock" id="decisionPill">account/page lock</span>
+            </div>
+            <div class="panel-body decision">
+              <div class="gauge" id="gauge" style="--angle: 126deg;">
+                <span class="needle"></span>
+                <span class="hub"></span>
+                <span class="score-number" id="scoreNumber">202</span>
+                <span class="score-max">risk score</span>
+              </div>
+              <div>
+                <h2 id="decisionTitle">Account/Page Lock Possible</h2>
+                <p id="decisionText">High pressure from rapid page growth, multi-country access, and admin asset risk. Identity match reduces risk, but does not fully stabilize the case.</p>
+                <div class="status-row" id="triggerPills"></div>
+              </div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2 class="panel-title">Case Snapshot</h2>
+            </div>
+            <div class="panel-body">
+              <div class="metrics">
+                <div class="metric"><div class="k">Desktop</div><div class="v" id="metricDesktop">GB</div></div>
+                <div class="metric"><div class="k">Mobile</div><div class="v" id="metricMobile">US</div></div>
+                <div class="metric"><div class="k">Identity</div><div class="v" id="metricIdentity">ID</div></div>
+                <div class="metric"><div class="k">Viral</div><div class="v" id="metricViral">5d</div></div>
+              </div>
+              <div style="height: 14px;"></div>
+              <div class="signal-flow">
+                <div class="flow-step"><strong>Access</strong><span id="flowAccess">GB desktop + US mobile</span></div>
+                <div class="flow-step"><strong>Identity</strong><span id="flowIdentity">ID phone + passport</span></div>
+                <div class="flow-step"><strong>Asset</strong><span id="flowAsset">young profile + young page</span></div>
+                <div class="flow-step"><strong>Score</strong><span id="flowScore">202 combined risk</span></div>
+                <div class="flow-step"><strong>Decision</strong><span id="flowDecision">lock or review</span></div>
+              </div>
+            </div>
+          </section>
+        </div>
+
+        <div class="section-grid">
+          <section class="panel">
+            <div class="panel-head">
+              <h2 class="panel-title">Signal Analytics</h2>
+              <span class="pill neutral" id="positiveTotal">positive +227</span>
+            </div>
+            <div class="panel-body">
+              <div class="signal-list" id="signalList"></div>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2 class="panel-title">Live JSON</h2>
+              <span class="pill neutral" id="reductionTotal">reduction -25</span>
+            </div>
+            <div class="panel-body">
+              <pre class="json-box" id="jsonBox"></pre>
+            </div>
+          </section>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <div class="copied" id="copiedToast">Copied JSON</div>
+
+  <script>
+    const defaults = {
+      desktopCountry: "GB",
+      mobileCountry: "US",
+      identityCountry: "ID",
+      deviceCount: 2,
+      profileAge: 210,
+      pageAge: 14,
+      viralDays: 5,
+      phoneNumber: "+62 851-7429-6831",
+      passportNumber: "C7384921",
+      recoveryActivity: true,
+      proxyVpn: true,
+      adminRisk: true,
+      trustedCookie: false
+    };
+
+    const ids = Object.keys(defaults);
+    const $ = (id) => document.getElementById(id);
+
+    function riskColor(value) {
+      if (value < 0) return "var(--green)";
+      if (value >= 28) return "var(--red)";
+      if (value >= 18) return "var(--amber)";
+      return "var(--cyan)";
+    }
+
+    function getState() {
+      return {
+        desktopCountry: $("desktopCountry").value,
+        mobileCountry: $("mobileCountry").value,
+        identityCountry: $("identityCountry").value,
+        deviceCount: Number($("deviceCount").value),
+        profileAge: Number($("profileAge").value),
+        pageAge: Number($("pageAge").value),
+        viralDays: Number($("viralDays").value),
+        phoneNumber: $("phoneNumber").value,
+        passportNumber: $("passportNumber").value,
+        recoveryActivity: $("recoveryActivity").checked,
+        proxyVpn: $("proxyVpn").checked,
+        adminRisk: $("adminRisk").checked,
+        trustedCookie: $("trustedCookie").checked
+      };
+    }
+
+    function scoreSignals(s) {
+      const accessCountries = new Set([s.desktopCountry, s.mobileCountry]);
+      const identityMismatch = !accessCountries.has(s.identityCountry);
+      const geoMismatch = new Set([s.desktopCountry, s.mobileCountry, s.identityCountry]).size;
+      const phonePassportMatch = s.identityCountry === "ID";
+
+      return [
+        {
+          name: "geo_mismatch",
+          value: `${s.desktopCountry}_${s.mobileCountry}_${s.identityCountry}`,
+          risk: geoMismatch >= 3 ? 28 : geoMismatch === 2 ? 14 : 0,
+          weight: "high"
+        },
+        {
+          name: "ip_country_split",
+          value: accessCountries.size,
+          risk: accessCountries.size > 1 ? 22 : 0,
+          weight: "high"
+        },
+        {
+          name: "identity_access_mismatch",
+          value: identityMismatch,
+          risk: identityMismatch ? 18 : 0,
+          weight: "medium"
+        },
+        {
+          name: "multi_device_recovery",
+          value: s.deviceCount,
+          risk: Math.max(0, (s.deviceCount - 1) * 10),
+          weight: "medium_high"
+        },
+        {
+          name: "profile_age_young",
+          value_days: s.profileAge,
+          risk: s.profileAge < 90 ? 22 : s.profileAge < 365 ? 12 : 0,
+          weight: "medium"
+        },
+        {
+          name: "page_age_young",
+          value_days: s.pageAge,
+          risk: s.pageAge <= 14 ? 22 : s.pageAge <= 45 ? 12 : 0,
+          weight: "medium_high"
+        },
+        {
+          name: "rapid_viral_growth",
+          value_days: s.viralDays,
+          risk: s.viralDays <= 5 ? 35 : s.viralDays <= 14 ? 20 : s.viralDays <= 30 ? 10 : 0,
+          weight: "high"
+        },
+        {
+          name: "admin_asset_risk",
+          value: s.adminRisk,
+          risk: s.adminRisk ? 30 : 0,
+          weight: "high"
+        },
+        {
+          name: "possible_proxy_or_vpn",
+          value: s.proxyVpn,
+          risk: s.proxyVpn ? 25 : 0,
+          weight: "conditional"
+        },
+        {
+          name: "recovery_activity",
+          value: s.recoveryActivity,
+          risk: s.recoveryActivity ? 15 : 0,
+          weight: "medium"
+        },
+        {
+          name: "identity_country_match",
+          value: {
+            phone_number: s.phoneNumber,
+            passport_number: s.passportNumber,
+            match: phonePassportMatch ? "phone_ID_passport_ID" : "unknown"
+          },
+          risk: phonePassportMatch ? -25 : 0,
+          weight: "risk_reducer"
+        },
+        {
+          name: "trusted_cookie",
+          value: s.trustedCookie,
+          risk: s.trustedCookie ? -30 : 0,
+          weight: "risk_reducer_if_present"
+        }
+      ];
+    }
+
+    function decisionFor(score) {
+      if (score <= 39) return {
+        key: "allow",
+        label: "Allow",
+        title: "Allow Login",
+        text: "The signal pattern is stable enough for low-friction access.",
+        className: "allow"
+      };
+      if (score <= 79) return {
+        key: "step_up_verify",
+        label: "Step-up Verify",
+        title: "Step-up Verification",
+        text: "The system would likely ask for an extra verification action before allowing normal access.",
+        className: "verify"
+      };
+      if (score <= 119) return {
+        key: "temporary_lock",
+        label: "Temporary Lock",
+        title: "Temporary Lock",
+        text: "The pattern is risky enough to pause access and require stronger proof.",
+        className: "lock"
+      };
+      if (score <= 179) return {
+        key: "manual_review",
+        label: "Manual Review",
+        title: "Manual Review Likely",
+        text: "The case has enough conflict that identity or asset-control review becomes likely.",
+        className: "review"
+      };
+      return {
+        key: "account_page_lock",
+        label: "Account/Page Lock",
+        title: "Account/Page Lock Possible",
+        text: "High pressure from rapid page growth, multi-country access, and admin asset risk. Identity match reduces risk, but does not fully stabilize the case.",
+        className: "lock"
+      };
+    }
+
+    function buildAnalysis() {
+      const s = getState();
+      const signals = scoreSignals(s);
+      const positive = signals.filter((x) => x.risk > 0).reduce((sum, x) => sum + x.risk, 0);
+      const reduction = signals.filter((x) => x.risk < 0).reduce((sum, x) => sum + x.risk, 0);
+      const combined = Math.max(0, positive + reduction);
+      const decision = decisionFor(combined);
+      const primary = signals
+        .filter((x) => x.risk >= 22)
+        .sort((a, b) => b.risk - a.risk)
+        .map((x) => x.name);
+
+      return {
+        case_type: "interactive_signal_risk_analysis",
+        model: "conceptual_not_meta_internal",
+        inputs: {
+          profile_age_days: s.profileAge,
+          page_age_days: s.pageAge,
+          viral_after_management_days: s.viralDays,
+          desktop_ip: "80.245.44.46",
+          desktop_country: s.desktopCountry,
+          mobile_ip: "38.213.28.85",
+          mobile_country: s.mobileCountry,
+          identity_country: s.identityCountry,
+          phone_number: s.phoneNumber,
+          passport_number: s.passportNumber,
+          device_count: s.deviceCount,
+          recovery_activity: s.recoveryActivity,
+          possible_proxy_or_vpn: s.proxyVpn,
+          admin_asset_risk: s.adminRisk,
+          trusted_cookie: s.trustedCookie
+        },
+        signals: Object.fromEntries(signals.map((x) => [x.name, x])),
+        score: {
+          positive_risk_total: positive,
+          risk_reduction_total: reduction,
+          combined_score: combined
+        },
+        thresholds: {
+          allow: [0, 39],
+          step_up_verify: [40, 79],
+          temporary_lock: [80, 119],
+          manual_review: [120, 179],
+          account_page_lock: [180, 999]
+        },
+        decision: {
+          value: decision.key,
+          label: decision.label,
+          primary_triggers: primary
+        },
+        recommended_stabilizers: {
+          trusted_device: true,
+          single_country_ip: true,
+          no_proxy_vpn: true,
+          same_phone_number: true,
+          low_retry_rate: true
+        }
+      };
+    }
+
+    function render() {
+      const state = getState();
+      const analysis = buildAnalysis();
+      const signalArray = Object.values(analysis.signals);
+      const score = analysis.score.combined_score;
+      const decision = decisionFor(score);
+      const angle = Math.min(150, Math.max(-150, -150 + (score / 240) * 300));
+
+      $("countryChip").textContent = `${state.desktopCountry} / ${state.mobileCountry} / ${state.identityCountry}`;
+      $("deviceChip").textContent = state.deviceCount;
+      $("profileChip").textContent = `${state.profileAge} days`;
+      $("pageChip").textContent = `${state.pageAge} days`;
+      $("viralChip").textContent = `${state.viralDays} days`;
+
+      const activeModifiers = ["recoveryActivity", "proxyVpn", "adminRisk", "trustedCookie"].filter((id) => $(id).checked).length;
+      $("modifierChip").textContent = `${activeModifiers} active`;
+
+      $("gauge").style.setProperty("--angle", `${angle}deg`);
+      $("scoreNumber").textContent = score;
+      $("decisionTitle").textContent = decision.title;
+      $("decisionText").textContent = decision.text;
+      $("decisionPill").className = `pill ${decision.className}`;
+      $("decisionPill").textContent = decision.label;
+
+      $("metricDesktop").textContent = state.desktopCountry;
+      $("metricMobile").textContent = state.mobileCountry;
+      $("metricIdentity").textContent = state.identityCountry;
+      $("metricViral").textContent = `${state.viralDays}d`;
+      $("flowAccess").textContent = `${state.desktopCountry} desktop + ${state.mobileCountry} mobile`;
+      $("flowIdentity").textContent = `${state.identityCountry} phone + passport`;
+      $("flowAsset").textContent = `${state.profileAge}d profile + ${state.pageAge}d page`;
+      $("flowScore").textContent = `${score} combined risk`;
+      $("flowDecision").textContent = decision.label;
+      $("positiveTotal").textContent = `positive +${analysis.score.positive_risk_total}`;
+      $("reductionTotal").textContent = `reduction ${analysis.score.risk_reduction_total}`;
+
+      $("triggerPills").innerHTML = analysis.decision.primary_triggers.slice(0, 5).map((name) => (
+        `<span class="pill neutral">${name}</span>`
+      )).join("");
+
+      $("signalList").innerHTML = signalArray
+        .sort((a, b) => Math.abs(b.risk) - Math.abs(a.risk))
+        .map((signal) => {
+          const width = Math.min(100, Math.abs(signal.risk) / 35 * 100);
+          const value = typeof signal.value === "object" ? signal.value.match : signal.value ?? signal.value_days;
+          return `
+            <div class="signal-row">
+              <div>
+                <div class="signal-name">${signal.name}</div>
+                <div class="signal-value">${value}</div>
+              </div>
+              <div class="risk-num">${signal.risk > 0 ? "+" : ""}${signal.risk}</div>
+              <div class="risk-bar"><span class="risk-fill" style="--w:${width}%;--bar:${riskColor(signal.risk)}"></span></div>
+            </div>
+          `;
+        }).join("");
+
+      $("jsonBox").textContent = JSON.stringify(analysis, null, 2);
+    }
+
+    function reset() {
+      for (const [id, value] of Object.entries(defaults)) {
+        const el = $(id);
+        if (typeof value === "boolean") el.checked = value;
+        else el.value = value;
+      }
+      render();
+    }
+
+    async function copyJson() {
+      await navigator.clipboard.writeText($("jsonBox").textContent);
+      $("copiedToast").classList.add("show");
+      setTimeout(() => $("copiedToast").classList.remove("show"), 1400);
+    }
+
+    function downloadJson() {
+      const blob = new Blob([$("jsonBox").textContent], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "interactive-signal-risk-analysis.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    for (const id of ids) {
+      $(id).addEventListener("input", render);
+      $(id).addEventListener("change", render);
+    }
+
+    $("resetBtn").addEventListener("click", reset);
+    $("copyBtn").addEventListener("click", copyJson);
+    $("downloadBtn").addEventListener("click", downloadJson);
+    render();
+  </script>
+</body>
+</html>
