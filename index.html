@@ -1,0 +1,1039 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Interactive Signal Risk Lab</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f6f9;
+      --panel: #ffffff;
+      --ink: #172033;
+      --muted: #61718a;
+      --line: #d8e0eb;
+      --blue: #2563eb;
+      --cyan: #008aa6;
+      --green: #16805a;
+      --amber: #c77700;
+      --red: #c62828;
+      --violet: #6d4cc2;
+      --shadow: 0 16px 38px rgba(23, 32, 51, 0.08);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+    }
+
+    button, input, select {
+      font: inherit;
+    }
+
+    header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .wrap {
+      width: min(1380px, calc(100% - 28px));
+      margin: 0 auto;
+    }
+
+    .topbar {
+      min-height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      flex-wrap: wrap;
+      padding: 14px 0;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      line-height: 1.15;
+      font-weight: 700;
+    }
+
+    .sub {
+      margin: 6px 0 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      color: var(--ink);
+      height: 38px;
+      min-width: 38px;
+      border-radius: 8px;
+      padding: 0 12px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      cursor: pointer;
+      transition: 160ms ease;
+    }
+
+    .btn:hover {
+      border-color: #aeb9ca;
+      background: #f8fafc;
+    }
+
+    .btn.primary {
+      background: var(--ink);
+      color: #fff;
+      border-color: var(--ink);
+    }
+
+    .btn.primary:hover {
+      background: #2a3a52;
+    }
+
+    main {
+      padding: 20px 0 34px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: 360px 1fr;
+      gap: 16px;
+      align-items: start;
+    }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+    }
+
+    .panel-head {
+      min-height: 54px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .panel-title {
+      margin: 0;
+      font-size: 15px;
+      line-height: 1.2;
+      font-weight: 700;
+    }
+
+    .panel-body {
+      padding: 16px;
+    }
+
+    .controls {
+      display: grid;
+      gap: 14px;
+    }
+
+    .control {
+      display: grid;
+      gap: 8px;
+      border-bottom: 1px solid #edf1f6;
+      padding-bottom: 13px;
+    }
+
+    .control:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      font-weight: 700;
+    }
+
+    .value-chip {
+      color: var(--muted);
+      background: #f2f5f9;
+      border: 1px solid #e0e7f0;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    select, input[type="text"], input[type="number"] {
+      width: 100%;
+      height: 38px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 0 10px;
+      color: var(--ink);
+      background: #fff;
+    }
+
+    .switch {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      font-size: 13px;
+      color: var(--ink);
+    }
+
+    .switch input {
+      width: 44px;
+      height: 24px;
+      appearance: none;
+      background: #cbd5e1;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: 160ms ease;
+      flex: 0 0 auto;
+    }
+
+    .switch input::after {
+      content: "";
+      position: absolute;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: #fff;
+      top: 3px;
+      left: 3px;
+      transition: 160ms ease;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.22);
+    }
+
+    .switch input:checked {
+      background: var(--green);
+    }
+
+    .switch input:checked::after {
+      left: 23px;
+    }
+
+    .score-panel {
+      min-height: 360px;
+      display: grid;
+      grid-template-rows: auto 1fr;
+    }
+
+    .decision {
+      display: grid;
+      grid-template-columns: 210px 1fr;
+      gap: 18px;
+      align-items: center;
+      padding: 16px;
+    }
+
+    .gauge {
+      width: 208px;
+      aspect-ratio: 1;
+      border-radius: 50%;
+      background:
+        radial-gradient(circle at center, #fff 0 56%, transparent 57%),
+        conic-gradient(var(--green) 0deg 72deg, var(--amber) 72deg 162deg, var(--red) 162deg 360deg);
+      position: relative;
+      border: 1px solid var(--line);
+    }
+
+    .gauge::after {
+      content: "";
+      position: absolute;
+      inset: 25px;
+      border-radius: 50%;
+      border: 1px solid #ebeff5;
+    }
+
+    .needle {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4px;
+      height: 82px;
+      background: var(--ink);
+      border-radius: 999px;
+      transform-origin: center bottom;
+      transform: translate(-50%, -100%) rotate(var(--angle));
+      z-index: 2;
+      transition: transform 300ms ease;
+    }
+
+    .hub {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      background: var(--ink);
+      transform: translate(-50%, -50%);
+      z-index: 3;
+    }
+
+    .score-number {
+      position: absolute;
+      left: 50%;
+      top: 62%;
+      transform: translate(-50%, -50%);
+      font-size: 32px;
+      font-weight: 850;
+      z-index: 4;
+    }
+
+    .score-max {
+      position: absolute;
+      left: 50%;
+      top: 76%;
+      transform: translate(-50%, -50%);
+      color: var(--muted);
+      font-size: 12px;
+      z-index: 4;
+    }
+
+    .decision h2 {
+      margin: 0 0 10px;
+      font-size: 34px;
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    .decision p {
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.5;
+      max-width: 620px;
+    }
+
+    .status-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .pill.allow { color: #047857; background: #dff7eb; }
+    .pill.verify { color: #8a5600; background: #fff0c2; }
+    .pill.lock { color: #991b1b; background: #ffe1e1; }
+    .pill.review { color: #5630a6; background: #eee7ff; }
+    .pill.neutral { color: #334155; background: #eef2f7; }
+
+    .signals-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .signal-card {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      padding: 12px;
+      background: #fafbfc;
+      font-size: 12px;
+    }
+
+    .signal-card-title {
+      font-weight: 700;
+      color: var(--ink);
+      margin: 0 0 4px;
+    }
+
+    .signal-card-value {
+      color: var(--muted);
+      margin: 2px 0;
+    }
+
+    .signal-risk {
+      font-weight: 700;
+      margin-top: 6px;
+      padding-top: 6px;
+      border-top: 1px solid var(--line);
+    }
+
+    .risk-positive {
+      color: var(--red);
+    }
+
+    .risk-negative {
+      color: var(--green);
+    }
+
+    .risk-neutral {
+      color: var(--muted);
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--line);
+      font-size: 13px;
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: var(--muted);
+    }
+
+    .summary-value {
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .preset-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .preset-btn {
+      border: 1px solid var(--line);
+      background: #fff;
+      min-height: 34px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--ink);
+      transition: 160ms ease;
+    }
+
+    .preset-btn:hover,
+    .preset-btn.active {
+      border-color: var(--blue);
+      background: #eef4ff;
+      color: var(--blue);
+    }
+
+    .threshold-indicator {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 6px;
+      margin-top: 12px;
+      font-size: 11px;
+    }
+
+    .threshold-bar {
+      padding: 8px 6px;
+      border-radius: 6px;
+      text-align: center;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .threshold-bar.allow {
+      background: var(--green);
+    }
+
+    .threshold-bar.verify {
+      background: var(--amber);
+    }
+
+    .threshold-bar.lock {
+      background: #f59e0b;
+    }
+
+    .threshold-bar.review {
+      background: var(--violet);
+    }
+
+    .threshold-bar.critical {
+      background: var(--red);
+    }
+
+    @media (max-width: 1024px) {
+      .layout {
+        grid-template-columns: 1fr;
+      }
+
+      .decision {
+        grid-template-columns: 1fr;
+      }
+
+      .signals-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+  </style>
+</head>
+<body>
+  <header>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <h1>Signal Risk Lab</h1>
+          <p class="sub">Analyze account access patterns and risk signals</p>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" onclick="analyzeCase()">Analyze</button>
+          <button class="btn" onclick="resetForm()">Reset</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <div class="wrap">
+      <div class="layout">
+        <!-- Left Panel: Controls -->
+        <div class="panel">
+          <div class="panel-head">
+            <h3 class="panel-title">Case Input</h3>
+          </div>
+          <div class="panel-body">
+            <div class="controls">
+              
+              <!-- Profile Age -->
+              <div class="control">
+                <label class="label-row">
+                  <span>Profile Age (days)</span>
+                  <span class="value-chip" id="profileAgeDisplay">210</span>
+                </label>
+                <input type="range" id="profileAge" min="0" max="365" value="210" oninput="updateDisplay('profileAge')">
+              </div>
+
+              <!-- Page Age -->
+              <div class="control">
+                <label class="label-row">
+                  <span>Page/Content Age (days)</span>
+                  <span class="value-chip" id="pageAgeDisplay">14</span>
+                </label>
+                <input type="range" id="pageAge" min="0" max="90" value="14" oninput="updateDisplay('pageAge')">
+              </div>
+
+              <!-- Viral Growth -->
+              <div class="control">
+                <label class="label-row">
+                  <span>Viral After (days)</span>
+                  <span class="value-chip" id="viralDisplay">5</span>
+                </label>
+                <input type="range" id="viralGrowth" min="0" max="30" value="5" oninput="updateDisplay('viralGrowth')">
+              </div>
+
+              <!-- Device Count -->
+              <div class="control">
+                <label class="label-row">
+                  <span>Device Count</span>
+                  <span class="value-chip" id="deviceCountDisplay">2</span>
+                </label>
+                <input type="range" id="deviceCount" min="1" max="10" value="2" oninput="updateDisplay('deviceCount')">
+              </div>
+
+              <!-- Desktop Country -->
+              <div class="control">
+                <label style="font-size: 13px; font-weight: 700; margin-bottom: 4px; display: block;">Desktop IP Country</label>
+                <select id="desktopCountry" onchange="analyzeCase()">
+                  <option value="ID">Indonesia (ID)</option>
+                  <option value="US" selected>USA (US)</option>
+                  <option value="GB">United Kingdom (GB)</option>
+                  <option value="AU">Australia (AU)</option>
+                  <option value="SG">Singapore (SG)</option>
+                  <option value="MY">Malaysia (MY)</option>
+                  <option value="PH">Philippines (PH)</option>
+                  <option value="TH">Thailand (TH)</option>
+                </select>
+              </div>
+
+              <!-- Mobile Country -->
+              <div class="control">
+                <label style="font-size: 13px; font-weight: 700; margin-bottom: 4px; display: block;">Mobile IP Country</label>
+                <select id="mobileCountry" onchange="analyzeCase()">
+                  <option value="ID">Indonesia (ID)</option>
+                  <option value="US">USA (US)</option>
+                  <option value="GB" selected>United Kingdom (GB)</option>
+                  <option value="AU">Australia (AU)</option>
+                  <option value="SG">Singapore (SG)</option>
+                  <option value="MY">Malaysia (MY)</option>
+                  <option value="PH">Philippines (PH)</option>
+                  <option value="TH">Thailand (TH)</option>
+                </select>
+              </div>
+
+              <!-- Identity Country -->
+              <div class="control">
+                <label style="font-size: 13px; font-weight: 700; margin-bottom: 4px; display: block;">Identity Country</label>
+                <select id="identityCountry" onchange="analyzeCase()">
+                  <option value="ID" selected>Indonesia (ID)</option>
+                  <option value="US">USA (US)</option>
+                  <option value="GB">United Kingdom (GB)</option>
+                  <option value="AU">Australia (AU)</option>
+                  <option value="SG">Singapore (SG)</option>
+                  <option value="MY">Malaysia (MY)</option>
+                  <option value="PH">Philippines (PH)</option>
+                  <option value="TH">Thailand (TH)</option>
+                </select>
+              </div>
+
+              <!-- Toggles -->
+              <div class="control">
+                <label class="switch">
+                  <span>Recovery Activity</span>
+                  <input type="checkbox" id="recoveryActivity" onchange="analyzeCase()">
+                </label>
+              </div>
+
+              <div class="control">
+                <label class="switch">
+                  <span>Possible Proxy/VPN</span>
+                  <input type="checkbox" id="proxyVPN" onchange="analyzeCase()">
+                </label>
+              </div>
+
+              <div class="control">
+                <label class="switch">
+                  <span>Trusted Cookie</span>
+                  <input type="checkbox" id="trustedCookie" onchange="analyzeCase()">
+                </label>
+              </div>
+
+              <!-- Presets -->
+              <div class="control">
+                <label style="font-size: 13px; font-weight: 700; margin-bottom: 4px; display: block;">Quick Presets</label>
+                <div class="preset-grid">
+                  <button class="preset-btn" onclick="loadPreset('safe')">Safe</button>
+                  <button class="preset-btn" onclick="loadPreset('travel')">Travel</button>
+                  <button class="preset-btn" onclick="loadPreset('risky')">Risky</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel: Results -->
+        <div>
+          <!-- Score Panel -->
+          <div class="panel score-panel">
+            <div class="panel-head">
+              <h3 class="panel-title">Risk Assessment</h3>
+            </div>
+            <div class="panel-body">
+              <div class="decision">
+                <div class="gauge">
+                  <div class="needle" id="needle" style="--angle: 0deg;"></div>
+                  <div class="hub"></div>
+                  <div class="score-number" id="scoreNumber">0</div>
+                  <div class="score-max">/300</div>
+                </div>
+                <div>
+                  <h2 id="decisionText">Allow</h2>
+                  <p id="decisionDesc">Account access is normal. No immediate risks detected.</p>
+                  <div class="status-row">
+                    <span class="pill allow" id="decisionPill">ALLOW</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Summary Stats -->
+              <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--line);">
+                <div class="summary-row">
+                  <span class="summary-label">Positive Risk</span>
+                  <span class="summary-value risk-positive" id="positiveRisk">0</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Risk Reduction</span>
+                  <span class="summary-value risk-negative" id="riskReduction">0</span>
+                </div>
+                <div class="summary-row">
+                  <span class="summary-label">Combined Score</span>
+                  <span class="summary-value" id="combinedScore">0</span>
+                </div>
+              </div>
+
+              <!-- Thresholds -->
+              <div style="margin-top: 16px;">
+                <p style="margin: 0 0 10px; font-size: 12px; font-weight: 700; color: var(--muted);">DECISION THRESHOLDS</p>
+                <div class="threshold-indicator">
+                  <div class="threshold-bar allow">Allow<br>0-39</div>
+                  <div class="threshold-bar verify">Verify<br>40-79</div>
+                  <div class="threshold-bar lock">Lock<br>80-119</div>
+                  <div class="threshold-bar review">Review<br>120-179</div>
+                  <div class="threshold-bar critical">Critical<br>180+</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Signals Panel -->
+          <div class="panel" style="margin-top: 16px;">
+            <div class="panel-head">
+              <h3 class="panel-title">Active Signals</h3>
+            </div>
+            <div class="panel-body">
+              <div class="signals-grid" id="signalsGrid">
+                <!-- Populated by JavaScript -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Primary Triggers Panel -->
+          <div class="panel" style="margin-top: 16px;">
+            <div class="panel-head">
+              <h3 class="panel-title">Primary Risk Triggers</h3>
+            </div>
+            <div class="panel-body">
+              <div id="triggersContent" style="font-size: 13px; color: var(--muted);">
+                No high-risk signals detected
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const SIGNAL_DEFINITIONS = {
+      geo_mismatch: {
+        name: "Geographic Mismatch",
+        description: "Multiple countries detected",
+        baseRisk: 28,
+        weight: "high"
+      },
+      ip_country_split: {
+        name: "IP Country Split",
+        description: "Different IPs from different regions",
+        baseRisk: 22,
+        weight: "high"
+      },
+      identity_access_mismatch: {
+        name: "Identity-Access Mismatch",
+        description: "Access location differs from identity",
+        baseRisk: 18,
+        weight: "medium"
+      },
+      multi_device_recovery: {
+        name: "Multi-Device Recovery",
+        description: "Multiple devices accessing account",
+        baseRisk: 20,
+        weight: "medium_high"
+      },
+      profile_age_young: {
+        name: "Profile Age Young",
+        description: "Account less than 1 year old",
+        baseRisk: 12,
+        weight: "medium"
+      },
+      page_age_young: {
+        name: "Page Age Young",
+        description: "Content less than 2 weeks old",
+        baseRisk: 22,
+        weight: "medium_high"
+      },
+      rapid_viral_growth: {
+        name: "Rapid Viral Growth",
+        description: "Content went viral very quickly",
+        baseRisk: 35,
+        weight: "high"
+      },
+      admin_asset_risk: {
+        name: "Admin Asset Risk",
+        description: "High-value/admin account",
+        baseRisk: 30,
+        weight: "high"
+      },
+      possible_proxy_or_vpn: {
+        name: "Proxy/VPN Usage",
+        description: "Potential proxy or VPN detected",
+        baseRisk: 25,
+        weight: "conditional"
+      },
+      recovery_activity: {
+        name: "Recovery Activity",
+        description: "Account recovery attempts detected",
+        baseRisk: 15,
+        weight: "medium"
+      },
+      identity_country_match: {
+        name: "Identity Country Match",
+        description: "Phone & identity from same country",
+        baseRisk: -25,
+        weight: "risk_reducer"
+      },
+      trusted_cookie: {
+        name: "Trusted Cookie",
+        description: "Device recognized as trusted",
+        baseRisk: -30,
+        weight: "risk_reducer_if_present"
+      }
+    };
+
+    function updateDisplay(fieldId) {
+      const field = document.getElementById(fieldId);
+      document.getElementById(fieldId + 'Display').textContent = field.value;
+      analyzeCase();
+    }
+
+    function analyzeCase() {
+      const profileAge = parseInt(document.getElementById('profileAge').value);
+      const pageAge = parseInt(document.getElementById('pageAge').value);
+      const viralGrowth = parseInt(document.getElementById('viralGrowth').value);
+      const deviceCount = parseInt(document.getElementById('deviceCount').value);
+      const desktopCountry = document.getElementById('desktopCountry').value;
+      const mobileCountry = document.getElementById('mobileCountry').value;
+      const identityCountry = document.getElementById('identityCountry').value;
+      const recoveryActivity = document.getElementById('recoveryActivity').checked;
+      const proxyVPN = document.getElementById('proxyVPN').checked;
+      const trustedCookie = document.getElementById('trustedCookie').checked;
+
+      // Calculate signals
+      const signals = {};
+      let positiveRisk = 0;
+      let riskReduction = 0;
+
+      // Geo Mismatch
+      if (desktopCountry !== identityCountry || mobileCountry !== identityCountry || desktopCountry !== mobileCountry) {
+        signals.geo_mismatch = SIGNAL_DEFINITIONS.geo_mismatch.baseRisk;
+        positiveRisk += SIGNAL_DEFINITIONS.geo_mismatch.baseRisk;
+      } else {
+        signals.geo_mismatch = 0;
+      }
+
+      // IP Country Split
+      if (desktopCountry !== mobileCountry) {
+        signals.ip_country_split = SIGNAL_DEFINITIONS.ip_country_split.baseRisk;
+        positiveRisk += SIGNAL_DEFINITIONS.ip_country_split.baseRisk;
+      } else {
+        signals.ip_country_split = 0;
+      }
+
+      // Identity Access Mismatch
+      if (identityCountry !== desktopCountry || identityCountry !== mobileCountry) {
+        signals.identity_access_mismatch = SIGNAL_DEFINITIONS.identity_access_mismatch.baseRisk;
+        positiveRisk += SIGNAL_DEFINITIONS.identity_access_mismatch.baseRisk;
+      } else {
+        signals.identity_access_mismatch = 0;
+      }
+
+      // Multi Device Recovery
+      signals.multi_device_recovery = deviceCount > 1 ? SIGNAL_DEFINITIONS.multi_device_recovery.baseRisk : 0;
+      positiveRisk += signals.multi_device_recovery;
+
+      // Profile Age Young
+      signals.profile_age_young = profileAge < 365 ? SIGNAL_DEFINITIONS.profile_age_young.baseRisk : 0;
+      positiveRisk += signals.profile_age_young;
+
+      // Page Age Young
+      signals.page_age_young = pageAge <= 14 ? SIGNAL_DEFINITIONS.page_age_young.baseRisk : 0;
+      positiveRisk += signals.page_age_young;
+
+      // Rapid Viral Growth
+      signals.rapid_viral_growth = viralGrowth <= 5 ? SIGNAL_DEFINITIONS.rapid_viral_growth.baseRisk : 0;
+      positiveRisk += signals.rapid_viral_growth;
+
+      // Admin Asset Risk
+      signals.admin_asset_risk = SIGNAL_DEFINITIONS.admin_asset_risk.baseRisk;
+      positiveRisk += signals.admin_asset_risk;
+
+      // Proxy/VPN
+      signals.possible_proxy_or_vpn = proxyVPN ? SIGNAL_DEFINITIONS.possible_proxy_or_vpn.baseRisk : 0;
+      positiveRisk += signals.possible_proxy_or_vpn;
+
+      // Recovery Activity
+      signals.recovery_activity = recoveryActivity ? SIGNAL_DEFINITIONS.recovery_activity.baseRisk : 0;
+      positiveRisk += signals.recovery_activity;
+
+      // Identity Country Match (reducer)
+      if (identityCountry === desktopCountry || identityCountry === mobileCountry) {
+        signals.identity_country_match = -SIGNAL_DEFINITIONS.identity_country_match.baseRisk;
+        riskReduction += SIGNAL_DEFINITIONS.identity_country_match.baseRisk;
+      } else {
+        signals.identity_country_match = 0;
+      }
+
+      // Trusted Cookie (reducer)
+      if (trustedCookie) {
+        signals.trusted_cookie = -SIGNAL_DEFINITIONS.trusted_cookie.baseRisk;
+        riskReduction += SIGNAL_DEFINITIONS.trusted_cookie.baseRisk;
+      } else {
+        signals.trusted_cookie = 0;
+      }
+
+      const combinedScore = Math.max(0, positiveRisk - riskReduction);
+
+      // Determine decision
+      let decision, description, pillClass;
+      if (combinedScore <= 39) {
+        decision = "Allow";
+        description = "Account access is normal. No immediate risks detected.";
+        pillClass = "allow";
+      } else if (combinedScore <= 79) {
+        decision = "Step-Up Verify";
+        description = "Request additional verification (2FA, email confirmation).";
+        pillClass = "verify";
+      } else if (combinedScore <= 119) {
+        decision = "Temporary Lock";
+        description = "Temporarily lock account and require identity verification.";
+        pillClass = "lock";
+      } else if (combinedScore <= 179) {
+        decision = "Manual Review";
+        description = "Escalate to manual review team for assessment.";
+        pillClass = "review";
+      } else {
+        decision = "Critical Lock";
+        description = "Immediately lock account due to high risk. Manual intervention required.";
+        pillClass = "lock";
+      }
+
+      // Update gauge
+      const angle = Math.min(180, (combinedScore / 300) * 180);
+      document.getElementById('needle').style.setProperty('--angle', angle + 'deg');
+      document.getElementById('scoreNumber').textContent = Math.round(combinedScore);
+      document.getElementById('decisionText').textContent = decision;
+      document.getElementById('decisionDesc').textContent = description;
+      document.getElementById('decisionPill').textContent = decision.toUpperCase().replace(/ /g, '');
+      document.getElementById('decisionPill').className = 'pill ' + pillClass;
+
+      // Update stats
+      document.getElementById('positiveRisk').textContent = positiveRisk;
+      document.getElementById('riskReduction').textContent = riskReduction;
+      document.getElementById('combinedScore').textContent = Math.round(combinedScore);
+
+      // Update signals grid
+      const signalsGrid = document.getElementById('signalsGrid');
+      signalsGrid.innerHTML = '';
+      
+      for (const [key, risk] of Object.entries(signals)) {
+        if (risk !== 0) {
+          const signal = SIGNAL_DEFINITIONS[key];
+          const isPositive = risk > 0;
+          const signalCard = document.createElement('div');
+          signalCard.className = 'signal-card';
+          signalCard.innerHTML = `
+            <p class="signal-card-title">${signal.name}</p>
+            <p class="signal-card-value">${signal.description}</p>
+            <p class="signal-risk ${isPositive ? 'risk-positive' : 'risk-negative'}">
+              ${isPositive ? '+' : ''}${risk} pts
+            </p>
+          `;
+          signalsGrid.appendChild(signalCard);
+        }
+      }
+
+      // Update triggers
+      const triggers = Object.entries(signals)
+        .filter(([key, risk]) => risk >= 22)
+        .map(([key]) => SIGNAL_DEFINITIONS[key].name);
+
+      const triggersContent = document.getElementById('triggersContent');
+      if (triggers.length > 0) {
+        triggersContent.innerHTML = triggers.map((t, i) => `<div style="padding: 6px 0;">• ${t}</div>`).join('');
+      } else {
+        triggersContent.innerHTML = '<div style="color: var(--muted);">No high-risk signals detected</div>';
+      }
+    }
+
+    function loadPreset(preset) {
+      if (preset === 'safe') {
+        document.getElementById('profileAge').value = 365;
+        document.getElementById('pageAge').value = 90;
+        document.getElementById('viralGrowth').value = 30;
+        document.getElementById('deviceCount').value = 1;
+        document.getElementById('desktopCountry').value = 'ID';
+        document.getElementById('mobileCountry').value = 'ID';
+        document.getElementById('identityCountry').value = 'ID';
+        document.getElementById('recoveryActivity').checked = false;
+        document.getElementById('proxyVPN').checked = false;
+        document.getElementById('trustedCookie').checked = true;
+      } else if (preset === 'travel') {
+        document.getElementById('profileAge').value = 180;
+        document.getElementById('pageAge').value = 30;
+        document.getElementById('viralGrowth').value = 15;
+        document.getElementById('deviceCount').value = 2;
+        document.getElementById('desktopCountry').value = 'ID';
+        document.getElementById('mobileCountry').value = 'SG';
+        document.getElementById('identityCountry').value = 'ID';
+        document.getElementById('recoveryActivity').checked = false;
+        document.getElementById('proxyVPN').checked = false;
+        document.getElementById('trustedCookie').checked = false;
+      } else if (preset === 'risky') {
+        document.getElementById('profileAge').value = 30;
+        document.getElementById('pageAge').value = 5;
+        document.getElementById('viralGrowth').value = 2;
+        document.getElementById('deviceCount').value = 5;
+        document.getElementById('desktopCountry').value = 'US';
+        document.getElementById('mobileCountry').value = 'GB';
+        document.getElementById('identityCountry').value = 'ID';
+        document.getElementById('recoveryActivity').checked = true;
+        document.getElementById('proxyVPN').checked = true;
+        document.getElementById('trustedCookie').checked = false;
+      }
+
+      updateAllDisplays();
+      analyzeCase();
+    }
+
+    function updateAllDisplays() {
+      document.getElementById('profileAgeDisplay').textContent = document.getElementById('profileAge').value;
+      document.getElementById('pageAgeDisplay').textContent = document.getElementById('pageAge').value;
+      document.getElementById('viralDisplay').textContent = document.getElementById('viralGrowth').value;
+      document.getElementById('deviceCountDisplay').textContent = document.getElementById('deviceCount').value;
+    }
+
+    function resetForm() {
+      document.getElementById('profileAge').value = 210;
+      document.getElementById('pageAge').value = 14;
+      document.getElementById('viralGrowth').value = 5;
+      document.getElementById('deviceCount').value = 2;
+      document.getElementById('desktopCountry').value = 'US';
+      document.getElementById('mobileCountry').value = 'GB';
+      document.getElementById('identityCountry').value = 'ID';
+      document.getElementById('recoveryActivity').checked = false;
+      document.getElementById('proxyVPN').checked = false;
+      document.getElementById('trustedCookie').checked = false;
+
+      updateAllDisplays();
+      analyzeCase();
+    }
+
+    // Initial analysis
+    analyzeCase();
+  </script>
+</body>
+</html>
